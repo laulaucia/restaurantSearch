@@ -1,0 +1,200 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Cool places to eat!</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/algoliasearch/3/algoliasearch.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/algoliasearch-helper@2.24.0/dist/algoliasearch.helper.min.js"></script>
+
+  </head>
+  <body>
+    <script type="text/javascript">
+
+
+    $(document).ready(function() {
+
+      
+        var applicationID = 'BK7ZL22IDB';
+        var apiKey = '8013722c2c8496548323eb41d04d39e3';
+        var indexName = 'dev_RESTAURANTS';
+        var client = algoliasearch(applicationID, apiKey);
+        var helper = algoliasearchHelper(client, indexName, {facets: ["food_type","payment_options", "stars_count"], hitsPerPage: 5, maxValuesPerFacet: 4, aroundPrecision: 100, aroundLatLngViaIP: true});
+        var currentPageHits = 5;
+        var $box = $("#search-box");
+        var $facets = $('#facet-list');
+        var $showMore = $('#loadMore');
+
+
+        // display something on response
+        helper.on('result', function(content) {
+          console.log(content);
+          renderFacetList($facets, content);
+          renderHits(content);
+        });
+
+        $facets.on('click', handleFacetClick);
+
+        function renderHits(content) {
+          $('#container').html(function() {
+            return $.map(content.hits, function(hit) {
+
+              return `<div class="row">
+                        <div class="col l2 s12 img-wrap">
+                          <img class="responsive-img" src="${hit.image_url}"/>
+                        </div>
+                        <div class="col s12 l8">
+                          <h5>${hit._highlightResult.name.value}</h5>
+                          <div>
+                            <span class="stars">${hit.stars_count}</span>
+                            <div class="star-ratings-sprite">
+                              <span style="width: ${(hit.stars_count/5 * 100)}%" class="star-ratings-sprite-rating"></span>
+                            </div>
+                            <span class="light-gray-text"> (${hit.reviews_count} reviews)</span>
+                          </div>
+                        <div> ${hit.food_type} | ${hit.neighborhood} | ${hit.price_range}</div>`;
+            });
+          });
+
+          $("#resultstat").html(function(){
+            var seconds = content.processingTimeMS / 1000;
+            return `<h5>${content.nbHits} results found <span class="light-gray-text">in ${seconds} seconds</span></h5>`;
+          });
+        }
+
+
+        function renderFacetList($facets, content) {
+          var facets = content.facets.map(function(facet){
+            var displayNames = {food_type: "Cuisine/ Food Type", stars_count: '', payment_options: "Payment Options"};
+            var name = facet.name;
+            var header = `<h5>${displayNames[name]}</h5`;
+            var facetValues = content.getFacetValues(name);
+            var facetvaluesList = $.map(facetValues, function(oneFacet){
+              var fvClass = oneFacet.isRefined ? 'active' : '';
+              var fvItem = `<a data-attribute="${name}" data-value="${oneFacet.name}" href="#">${oneFacet.name}<span class="facet-count">${oneFacet.count}</span> </a>`;
+              return `<div class="item ${fvClass}">${fvItem}</div>`;
+            });
+            return `${header}<div>${facetvaluesList.join('')}</div>`;
+          });
+          $facets.html(facets.join(''));
+        }
+
+        function handleFacetClick(e) {
+          e.preventDefault();
+          var target = e.target;
+          var attribute = target.dataset.attribute;
+          var value = target.dataset.value;
+          if(!attribute || !value) return;
+          helper.toggleRefine(attribute, value).search();
+        }
+
+        $('#nostars').on('click', function(){
+            helper.setQueryParameter('filters','stars_count: 0 TO 1').search();
+        });
+        $('#1star').on('click', function(){
+            helper.search({filters: 'stars_count: 1 TO 2'});
+        });
+        $('#2stars').on('click', function(){
+            helper.search({filters: 'stars_count: 2 TO 3'});
+        });
+        $('#3stars').on('click', function(){
+            helper.search({filters: 'stars_count: 3 TO 4'});
+        });
+        $('#4stars').on('click', function(){
+          console.log(helper.setQueryParameter('filters' , 'stars_count: 4 TO 4.5'));
+            helper.setQueryParameter('filters' , "stars_count: 4 TO 4.5").search();
+        });
+        $('#5stars').on('click', function(){
+            helper.search({filters: 'stars_count: 4.5 TO 5'});
+        });
+        // search when something is typed
+        $box.on('keyup',function() {
+          helper.setQuery($(this).val())
+                .search();
+        });
+        // add 5 more results on show more click 
+        $showMore.on('click', function(){
+          currentPageHits += 5;
+          helper.setQueryParameter('hitsPerPage', currentPageHits).search();
+        });
+        // initial search to render page 
+        helper.search();
+    });
+    </script>
+
+      <div class="container">
+        <div class="restaurant-finder z-depth-4">
+          <div class="search-header">
+            <input id="search-box" autocomplete="off" class="search-bar browser-default" type="text" placeholder="Search for Restaurants by Name, Cuisine, Location"/>
+          </div>
+          <div class="row">
+            <div class="col s12 l3 ">
+              <div class="filters">
+                <div id="facet-list"></div>
+                <div id="stars">
+                  <div id="nostars" class="stargroup">
+                    <img src="resources/graphics/star-empty.png">
+                    <img src="resources/graphics/star-empty.png">
+                    <img src="resources/graphics/star-empty.png">
+                    <img src="resources/graphics/star-empty.png">
+                    <img src="resources/graphics/star-empty.png">
+                  </div>
+                  <div id="1star" class="stargroup">
+                    <img src="resources/graphics/stars-plain.png">
+                    <img src="resources/graphics/star-empty.png">
+                    <img src="resources/graphics/star-empty.png">
+                    <img src="resources/graphics/star-empty.png">
+                    <img src="resources/graphics/star-empty.png">
+                  </div>
+                  <div id="2stars" class="stargroup">
+                    <img src="resources/graphics/stars-plain.png">
+                    <img src="resources/graphics/stars-plain.png">
+                    <img src="resources/graphics/star-empty.png">
+                    <img src="resources/graphics/star-empty.png">
+                    <img src="resources/graphics/star-empty.png">
+                  </div>
+                  <div id="3stars" class="stargroup">
+                    <img src="resources/graphics/stars-plain.png">
+                    <img src="resources/graphics/stars-plain.png">
+                    <img src="resources/graphics/stars-plain.png">
+                    <img src="resources/graphics/star-empty.png">
+                    <img src="resources/graphics/star-empty.png">
+                  </div>
+                  <div id="4stars" class="stargroup">
+                    <img src="resources/graphics/stars-plain.png">
+                    <img src="resources/graphics/stars-plain.png">
+                    <img src="resources/graphics/stars-plain.png">
+                    <img src="resources/graphics/stars-plain.png">
+                    <img src="resources/graphics/star-empty.png">
+                  </div>
+                   <div id="5stars" class="stargroup">
+                    <img src="resources/graphics/stars-plain.png">
+                    <img src="resources/graphics/stars-plain.png">
+                    <img src="resources/graphics/stars-plain.png">
+                    <img src="resources/graphics/stars-plain.png">
+                    <img src="resources/graphics/stars-plain.png">
+                  </div>
+                </div>
+
+              </div>
+            </div>
+            <div class="col s12 l9 resultBox">
+              <h3 id="resultstat"></h3>
+              <hr>
+              <div id="container"></div>
+              <center>
+                <button id="loadMore">Show More</button>
+              </center>
+            </div> 
+          </div>
+        </div>
+      </div>
+
+
+  </body>
+</html>

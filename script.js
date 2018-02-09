@@ -6,7 +6,7 @@
         var apiKey = '8013722c2c8496548323eb41d04d39e3';
         var indexName = 'dev_RESTAURANTS';
         var client = algoliasearch(applicationID, apiKey);
-        var helper = algoliasearchHelper(client, indexName, {facets: ["food_type","payment_options", "stars_count"], hitsPerPage: 5, maxValuesPerFacet: 4, aroundPrecision: 100, aroundLatLngViaIP: true});
+        var helper = algoliasearchHelper(client, indexName, {facets: ["food_type", "stars_count", "payment_options", ],hitsPerPage: 5, maxValuesPerFacet: 4, aroundPrecision: 100, aroundLatLngViaIP: true});
         var currentPageHits = 5;
         var $box = $("#search-box");
         var $facets = $('#facet-list');
@@ -21,6 +21,7 @@
         });
 
         $facets.on('click', handleFacetClick);
+        $('.stargroup').on('click', handleRatingClick);
 
         function renderHits(content) {
           $('#container').html(function() {
@@ -52,7 +53,7 @@
 
         function renderFacetList($facets, content) {
           var facets = content.facets.map(function(facet){
-            var displayNames = {food_type: "Cuisine/ Food Type", stars_count: '', payment_options: "Payment Options"};
+            var displayNames = {food_type: "Cuisine/ Food Type", stars_count: 'Star Rating', payment_options: "Payment Options"};
             var name = facet.name;
             var header = `<h5>${displayNames[name]}</h5`;
             var facetValues = content.getFacetValues(name);
@@ -70,31 +71,25 @@
           e.preventDefault();
           var target = e.target;
           var attribute = target.dataset.attribute;
+          console.log(target);
+          console.log(attribute);
           var value = target.dataset.value;
           if(!attribute || !value) return;
           helper.toggleRefine(attribute, value).search();
         }
 
+        function handleRatingClick(e) {
+          e.preventDefault();
+          var target = e.target;
+          var attribute = target.dataset.attribute;
+          console.log(target);
+          console.log(attribute);
+          var upperBound = target.dataset.upperBound;
+          var lowerBound = target.dataset.lowerBound;
 
-        // attempt at grouping star filters - I seem to be missing something
-        $('#nostars').on('click', function(){
-            helper.setQueryParameter('filters','stars_count: 0 TO 1').search();
-        });
-        $('#1star').on('click', function(){
-            helper.search({filters: 'stars_count: 1 TO 2'});
-        });
-        $('#2stars').on('click', function(){
-            helper.search({filters: 'stars_count: 2 TO 3'});
-        });
-        $('#3stars').on('click', function(){
-            helper.search({filters: 'stars_count: 3 TO 4'});
-        });
-        $('#4stars').on('click', function(){
-            helper.setState({stars_count: 5});
-        });
-        $('#5stars').on('click', function(){
-            helper.search({filters: 'stars_count: 4.5 TO 5'});
-        });
+          helper.addNumericRefinement(attribute,">=", lowerBound).addNumericRefinement(attribute, '<=', upperBound).search();
+        }
+
         // search when something is typed
         $box.on('keyup',function() {
           helper.setQuery($(this).val())

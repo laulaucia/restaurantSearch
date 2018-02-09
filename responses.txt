@@ -1,1 +1,96 @@
-responses.txt
+Question 1:
+
+###Question###
+
+Hello,
+
+I'm new to search engines, and there are a lot of concepts I'm not educated on. To make my onboarding smoother, it'd help if you could provide me with some definitions of the following concepts:
+- Records
+- Indexing
+
+I'm also struggling with understanding what types of metrics would be useful to include in the "Custom Ranking." 
+
+Cheers,
+George
+
+###Response###
+
+Hi George,
+
+I'd be happy to give you some definitions!
+
+- Records: From our FAQ - "A record is an object you add to an index and want to search for. It can contain any number of attributes."  I like to think of it as a single unit of collected data that should belong together. For example if you were making a movie database, a record you might have would be a movie.  Some attributes you might include with each movie record are: title, actors, director, rating, year released, etc.
+
+An example of a single record formatted in JSON looks like this: 
+
+{
+  "title": "Titanic",
+  "rating": "PG-13",
+  "director": "James Cameron",
+  "Actors": ["Leonardo Dicaprio", "Kate Winslet", "Billy Zane"],
+  "year": 1997
+}
+
+ 
+-Indexing: Indexing is basically the process by which we take in, save, and organize your data (AKA records) in order for you to be able to search through it with Algolia. 
+We have a lot to say on indexing! here is the best place to get started https://www.algolia.com/doc/guides/indexing/indexing-overview/ 
+
+
+For "Custom Ranking" its helpful to think of the type of data you have and what you want to be shown first. Let's say you are building a restaurant database and you happen to have star ratings for each restaurant. You may want to use custom ranking on your star rating attribute so that results with the highest ratings come up first.  For more on custom ranking visit https://www.algolia.com/doc/guides/ranking/custom-ranking/.
+
+
+I hope that was helpful! Let me know If I can clarify anything else.
+
+Best,
+ 
+Laura
+
+
+As far as  
+
+###Question###
+
+Question 2:
+Hello,
+
+Sorry to give you the kind of feedback that I know you do not want to hear, but I really hate the new dashboard design. Clearing and deleting indexes are now several clicks away. I am needing to use these features while iterating, so this is inconvenient.
+
+Regards,
+Matt
+
+###Response###
+
+Hi Matt,
+
+I'm really sorry to hear that. I know we probably added those clicks to make it more difficult to delete an index accidentally from the dashboard. I'm not sure if this might help you but we have some API methods you may be able to integrate into your workflow so that you won't have to do as much clicking in the dashboard.
+
+https://www.algolia.com/doc/api-reference/api-methods/delete-index/
+https://www.algolia.com/doc/api-reference/api-methods/clear-index/
+
+That being said I will certainly relay your feedback to our dashboard team! 
+
+Best,
+
+Laura
+
+
+###Question###
+
+Question 3:
+Hi,
+
+I'm looking to integrate Algolia in my website. Will this be a lot of development work for me? What's the high level process look like?
+
+Regards,
+Leo
+
+###Response###
+
+Hi Leo,
+
+We've tried to make implementation of Algolia search as smooth as possible. The high level process is basically uploading your data, figuring out how you want it to look, and then using our easy to use javascript libraries to build a UI. Leveraging InstantSearch.js, it's widgets, and with some basic html, css and javascript knowledge you can make a working UI in minutes. I highly recommend checking out the video here: https://www.algolia.com/doc/tutorials/search-ui/instant-search/build-an-instant-search-results-page/instantsearchjs/ to get you started. We have a 14 day free trial so you can test it out for yourself with no commitment. If you still have questions I'm more than happy to point you in the right direction.
+
+
+Happy building!
+
+Laura
